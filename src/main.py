@@ -18,7 +18,7 @@ class Puzzle:
         print("2. Input File")
 
         choice = int(input("Masukkan pilihan: "))
-        while (choice < 1 or choice > 2):
+        while (choice < 1 or choice > 2 or type(choice) != int):
             print("Pilihan tidak valid")
             choice = int(input("Masukan pilihan: "))
         matriks = []
@@ -35,6 +35,7 @@ class Puzzle:
             while not exists(filename):
                 print("File tidak ditemukan")
                 filename = input("Masukkan nama file: ")
+                filename = "../test/" + filename
 
             f = open(filename, "r")
             matriks = [[int(num) for num in line.strip("\n").split(" ")] for line in f]
@@ -67,6 +68,7 @@ class Puzzle:
         queue.push(start)
         while (not queue.isEmpty()):
             current = queue.pop()
+            # print("Current: ", current.depth, ",", current.cost)
             if (current.isGoal()):
                 self.solution.append(current)
                 queue.kill(current.cost)

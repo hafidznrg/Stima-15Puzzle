@@ -94,3 +94,8 @@ class Node:
             case Direction.RIGHT:
                 return "RIGHT"
         return None
+
+    def __lt__(self, other):
+        if (self.cost == other.cost):
+            return self.depth > other.depth
+        return self.cost < other.cost

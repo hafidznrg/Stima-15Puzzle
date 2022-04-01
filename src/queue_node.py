@@ -1,22 +1,15 @@
-from node import Node
+import heapq as hq
 
 class QueueNode:
     def __init__(self):
         self.queue = []
+        hq.heapify(self.queue)
 
     def push(self, node):
-        if (self.length() == 0):
-            self.queue.append(node)
-        else:
-            for i in range(self.length()):
-                if (node.cost < self.queue[i].cost):
-                    self.queue.insert(i, node)
-                    break
-                elif (i == self.length() - 1):
-                    self.queue.append(node)
+        hq.heappush(self.queue, node)
 
     def pop(self):
-        return self.queue.pop(0)
+        return hq.heappop(self.queue)
     
     def length(self):
         return len(self.queue)
@@ -31,6 +24,7 @@ class QueueNode:
                 self.queue.pop(i)
             else:
                 i += 1
+        hq.heapify(self.queue)
 
     def print(self):
         for node in self.queue:
