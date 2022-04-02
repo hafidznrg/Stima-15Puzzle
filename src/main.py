@@ -11,6 +11,7 @@ class Puzzle:
         self.solution = []
         self.banyakSimpul = 1
         self.route = []
+        self.visited = set()
 
     def getInput(self):
         print("Pilih metode masukan data:")
@@ -69,6 +70,12 @@ class Puzzle:
         while (not queue.isEmpty()):
             current = queue.pop()
             # print("Current: ", current.depth, ",", current.cost)
+            hashedMat = np.array(current.matriks).tobytes()
+            if (hashedMat in self.visited):
+                continue
+            else:
+                self.visited.add(hashedMat)
+
             if (current.isGoal()):
                 self.solution.append(current)
                 queue.kill(current.cost)
