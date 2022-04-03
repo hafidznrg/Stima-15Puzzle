@@ -70,10 +70,17 @@ class Node:
 
     # Method untuk mencetak matriks
     def printMatriks(self):
+        print("\t+-----+-----+-----+-----+")
         for i in range(4):
+            print("\t|", end="")
             for j in range(4):
-                print(self.matriks[i][j], end = " ") if self.matriks[i][j] != 16 else print("#", end = " ")
-            print()
+                if (self.matriks[i][j] == 16):
+                    print("     |", end = "")
+                elif (self.matriks[i][j] > 9):
+                    print("  " + str(self.matriks[i][j]) + " |", end="")
+                else:
+                    print("  " + str(self.matriks[i][j]) + "  |", end="")
+            print("\n\t+-----+-----+-----+-----+")
 
     # Method untuk mencetak langkah terakhir suatu node
     def getLastRoute(self):

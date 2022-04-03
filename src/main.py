@@ -126,24 +126,34 @@ class Puzzle:
 
     # Method untuk mencetak matriks
     def printMatriks(self):
+        print("\t+-----+-----+-----+-----+")
         for i in range(4):
+            print("\t|", end="")
             for j in range(4):
-                print(self.matriks[i][j], end = " ") if self.matriks[i][j] != 16 else print("#", end = " ")
-            print()
+                if (self.matriks[i][j] == 16):
+                    print("     |", end = "")
+                elif (self.matriks[i][j] > 9):
+                    print("  " + str(self.matriks[i][j]) + " |", end="")
+                else:
+                    print("  " + str(self.matriks[i][j]) + "  |", end="")
+            print("\n\t+-----+-----+-----+-----+")
 
 # ======== MAIN PROGRAM ======== #
 game = Puzzle()
-print("Konfigurasi game:")
+print("\nKonfigurasi game:")
 game.printMatriks()
 
 # Mencetak tabel kurang
+print("\n======================================")
 print("Tabel kurang:")
 for i in range(8):
-    print(i+1, ": ", game.kurang[i], "\t", i+8, ": ", game.kurang[i+8])
-print("X: ", (game.EmptyRow+game.EmptyCol)%2)
+    print("\t", i+1, ": ", game.kurang[i], "\t", i+8, ": ", game.kurang[i+8])
+print("\tX: ", (game.EmptyRow+game.EmptyCol)%2)
 
 # check Kurang(i) + X
-print("\nTotal Kurang + X : " + str(sum(game.kurang) + (game.EmptyRow+game.EmptyCol)%2))
+print("Total Kurang + X : " + str(sum(game.kurang) + (game.EmptyRow+game.EmptyCol)%2))
+print("======================================\n")
+
 # Jika Kurang(i) + X ganjil makan tidak ada solusi
 if (game.totalKurang%2 == 1):
     print("Puzzle tidak dapat diselesaikan")
