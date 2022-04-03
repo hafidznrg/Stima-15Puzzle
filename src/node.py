@@ -7,24 +7,17 @@ class Direction(Enum):
     UP = 4
 
 class Node:
-    def __init__(self, matriks, route = [], parent = None, depth = 0):
+    # Constructor
+    def __init__(self, matriks, cost, emptyRow, emptyCol, route = [], parent = None, depth = 0):
         self.matriks = matriks
         self.route = route
         self.parent = parent
         self.depth = depth
-        self.cost = self.calculateCost()
-        self.x, self.y = self.getEmptyCell()
+        self.cost = cost
+        self.emptyRow = emptyRow
+        self.emptyCol = emptyCol
     
-    def calculateCost(self):
-        if self.depth == 0:
-            return 0
-        cost = 0
-        for i in range(16):
-            if (self.matriks[i // 4][i % 4] != 0 and self.matriks[i // 4][i % 4] != i + 1):
-                cost += 1
-        cost += self.depth
-        return cost
-    
+    # Method print untuk mencetak info node, untuk pengecekan
     def print(self):
         print("Route: ", self.route)
         print("Parent: " + str(self.parent))
@@ -32,55 +25,57 @@ class Node:
         print("Cost: " + str(self.cost))
         self.printMatriks()
     
+    # Method untuk mengecek apakah merupakan goal node
     def isGoal(self):
-        isGoal = True
-        for i in range(15):
-            if (self.matriks[i // 4][i % 4] != i + 1):
-                isGoal = False
-                break
-        return isGoal
+        return self.matriks == [[1,2,3,4],[5,6,7,8],[9,10,11,12],[13,14,15,16]]
 
-    def getEmptyCell(self):
-        for i in range(4):
-            for j in range(4):
-                if self.matriks[i][j] == 16:
-                    return i, j
-    
-    def moveEmptyCell(self, direction):
-        if direction == Direction.UP:
-            if (self.x > 0 and (self.route == [] or self.route[-1] != Direction.DOWN)):
-                return self.move(self.x, self.y, -1, 0)
-        elif direction == Direction.DOWN:
-            if (self.x < 3 and (self.route == [] or self.route[-1] != Direction.UP)):
-                return self.move(self.x, self.y, 1, 0)
-        elif direction == Direction.LEFT:
-            if (self.y > 0 and (self.route == [] or self.route[-1] != Direction.RIGHT)):
-                return self.move(self.x, self.y, 0, -1)
-        elif direction == Direction.RIGHT:
-            if (self.y < 3 and (self.route == [] or self.route[-1] != Direction.LEFT)):
-                return self.move(self.x, self.y, 0, 1)
-        
-        return None
-
-    def move(self, x, y, dx, dy):
-        temp = [[num for num in row] for row in self.matriks]
-        temp[x][y], temp[x + dx][y + dy] = temp[x + dx][y + dy], temp[x][y]
-        return temp
-    
+    # Method untuk membangkitkan anak-anak dari suatu node
     def getChildren(self):
         children = []
+
+        # Iterasi pada arah yang dapat dilalui
         for direction in Direction:
-            child = self.moveEmptyCell(direction)
-            if child != None:
-                children.append(Node(child, self.route + [direction], self, self.depth + 1))
+            # Menyalin informasi dari parent
+            childMat = [[num for num in row] for row in self.matriks]
+            childRoute = self.route + [direction]
+            newEmptyRow = self.emptyRow
+            newEmptyCol = self.emptyCol
+
+            # Membandingkan arah yang dipilih
+            match direction:
+                case Direction.UP:
+                    if (self.emptyRow > 0 and (self.route == [] or self.route[-1] != Direction.DOWN)):
+                        newEmptyRow -= 1
+                case Direction.DOWN:
+                    if (self.emptyRow < 3 and (self.route == [] or self.route[-1] != Direction.UP)):
+                        newEmptyRow += 1
+                case Direction.LEFT:
+                    if (self.emptyCol > 0 and (self.route == [] or self.route[-1] != Direction.RIGHT)):
+                        newEmptyCol -= 1
+                case Direction.RIGHT:
+                    if (self.emptyCol < 3 and (self.route == [] or self.route[-1] != Direction.LEFT)):
+                        newEmptyCol += 1
+            
+            # Jika arah yang dipilih vaid, tambahkan ke children
+            if (self.emptyRow != newEmptyRow or self.emptyCol != newEmptyCol):
+                # Menghitung misplaced pada susunan matriks baru
+                misplaced = 0
+                if (childMat[newEmptyRow][newEmptyCol] == self.emptyRow*4 + self.emptyCol + 1): misplaced -= 1
+                childMat[self.emptyRow][self.emptyCol], childMat[newEmptyRow][newEmptyCol] = childMat[newEmptyRow][newEmptyCol], childMat[self.emptyRow][self.emptyCol]
+                if (childMat[newEmptyRow][newEmptyCol] == self.emptyRow*4 + self.emptyCol + 1): misplaced += 1
+                # Menambahkan node baru ke children
+                children.append(Node(childMat, self.cost + misplaced + 1, newEmptyRow, newEmptyCol, childRoute, self, self.depth + 1))
+        
         return children
 
+    # Method untuk mencetak matriks
     def printMatriks(self):
         for i in range(4):
             for j in range(4):
                 print(self.matriks[i][j], end = " ") if self.matriks[i][j] != 16 else print("#", end = " ")
             print()
 
+    # Method untuk mencetak langkah terakhir suatu node
     def getLastRoute(self):
         match self.route[-1]:
             case Direction.UP:
@@ -93,6 +88,7 @@ class Node:
                 return "RIGHT"
         return None
 
+    # Method overloading '<' untuk membantu heapq
     def __lt__(self, other):
         if (self.cost == other.cost):
             return self.depth > other.depth

@@ -5,86 +5,109 @@ from node import Node
 import time
 
 class Puzzle:
+    # Constructor
     def __init__(self):
         self.matriks = self.getInput()
-        self.totalKurang = self.kurang()
+        self.EmptyRow = 0
+        self.EmptyCol = 0
+        self.cost = 0
+        self.kurang = []
+        self.totalKurang = 0
         self.solution = []
-        self.banyakSimpul = 1
         self.route = []
         self.visited = set()
+        self.banyakSimpul = 1
+        self.kalkulasi()
 
+    # Method untuk mendapatkan input matriks
     def getInput(self):
         print("Pilih metode masukan data:")
         print("1. Matriks Random")
         print("2. Input File")
 
+        # Pilihan input
         choice = int(input("Masukkan pilihan: "))
         while (choice < 1 or choice > 2 or type(choice) != int):
             print("Pilihan tidak valid")
             choice = int(input("Masukan pilihan: "))
         matriks = []
+
         if choice == 1:
+        # Input matriks secara random
             temp = np.random.permutation(np.arange(1, 17))
             temp = np.ndarray.tolist(temp)
+
+            # Menyalin list ke dalam matriks
             matriks.append(temp[0:4])
             matriks.append(temp[4:8])
             matriks.append(temp[8:12])
             matriks.append(temp[12:16])
         else:
+        # Input matriks dari file
             filename = input("Masukkan nama file: ")
-            filename = "../test/" + filename
             while not exists(filename):
                 print("File tidak ditemukan")
                 filename = input("Masukkan nama file: ")
-                filename = "../test/" + filename
 
             f = open(filename, "r")
+            # Menyalin isi file ke dalam matriks
             matriks = [[int(num) for num in line.strip("\n").split(" ")] for line in f]
         
         return matriks
 
-    def kurang(self):
-        row = 0
-        col = 0
+    # Method untuk melakukan kalkulasi sum kurang dan cost matriks awal
+    def kalkulasi(self):
+        # Perulangan untuk mencari sel kosong dan menghitung cost
         for i in range(4):
             for j in range(4):
                 if self.matriks[i][j] == 16:
-                    row = i
-                    col = j
-                    break
+                    self.EmptyRow = i
+                    self.EmptyCol = j
+                else:
+                    self.cost += (self.matriks[i][j] != i*4 + j + 1)
 
-        total = 0
+        # Perulangan untuk mencari tabel kurang
         for i in range(16):
+            temp = 0
             for j in range(i+1,16):
                 if (self.matriks[j//4][j%4] < self.matriks[i//4][i%4]):
-                    total += 1
+                    temp += 1
+            self.kurang.append(temp)
         
-        if ((row+col)%2 == 1):
-            total += 1
-        return total
+        # if ((self.EmptyRow+self.EmptyCol)%2 == 1):
+        #     self.totalKurang += 1
 
+    # Method untuk menyelesaikan puzzle
     def solve(self):
-        start = Node(self.matriks)
+        # Inisialisasi root node
+        start = Node(self.matriks, self.cost, self.EmptyRow, self.EmptyCol)
         queue = QueueNode()
         queue.push(start)
+        
+        # Perulangan untuk mencari solusi
         while (not queue.isEmpty()):
             current = queue.pop()
             # print("Current: ", current.depth, ",", current.cost)
-            hashedMat = np.array(current.matriks).tobytes()
-            if (hashedMat in self.visited):
+
+            # Mengecek apakah sebuah matriks sudah pernah dicek atau belum
+            if (np.array(current.matriks).tobytes() in self.visited):
                 continue
             else:
-                self.visited.add(hashedMat)
+                self.visited.add(np.array(current.matriks).tobytes())
 
             if (current.isGoal()):
+            # Cek apakah node ini merupakan goal node
                 self.solution.append(current)
                 queue.kill(current.cost)
+                break
             else:
+            # Jika bukan goal node, bangkitkan anak-anak berdasarkan node yang dicek
                 child = current.getChildren()
                 self.banyakSimpul += len(child)
                 for node in child:
                     queue.push(node)
 
+    # Method untuk mencari rute dari sebuah solusi yang ditemukan
     def findRoute(self):
         result = self.solution[0]
         while (result.parent != None):
@@ -92,6 +115,7 @@ class Puzzle:
             result = result.parent
         self.route.reverse()
 
+    # Method untuk mencetak langkah-langkah penyelesaian
     def printResult(self):
         for i in range(len(self.route)):
             print()
@@ -100,20 +124,28 @@ class Puzzle:
         
         print("\nJumlah simpul yang dibangkitkan: ", self.banyakSimpul)
 
+    # Method untuk mencetak matriks
     def printMatriks(self):
         for i in range(4):
             for j in range(4):
                 print(self.matriks[i][j], end = " ") if self.matriks[i][j] != 16 else print("#", end = " ")
             print()
 
+# ======== MAIN PROGRAM ======== #
 game = Puzzle()
 print("Konfigurasi game:")
 game.printMatriks()
 
+# Mencetak tabel kurang
+print("Tabel kurang:")
+for i in range(8):
+    print(i+1, ": ", game.kurang[i], "\t", i+8, ": ", game.kurang[i+8])
+print("X: ", (game.EmptyRow+game.EmptyCol)%2)
+
 # check Kurang(i) + X
-print("\nTotal Kurang + X : " + str(game.kurang()))
-# jika Kurang(i) + X ganjil makan tidak ada solusi
-if (game.kurang()%2 == 1):
+print("\nTotal Kurang + X : " + str(sum(game.kurang) + (game.EmptyRow+game.EmptyCol)%2))
+# Jika Kurang(i) + X ganjil makan tidak ada solusi
+if (game.totalKurang%2 == 1):
     print("Puzzle tidak dapat diselesaikan")
 else:
     print("Puzzle dapat diselesaikan")
