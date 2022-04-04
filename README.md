@@ -8,6 +8,9 @@ Program ini dibuat untuk memenuhi Tugas Kecil 3 IF2211 Strategi Algoritma. Progr
 - Program ini dapat menerima input matriks dari sebuah file atau sebuah matriks random.
 - Program ini dapat menampilkan nilai fungsi kurang(i) pada susunan matriks yang diberikan.
 - Program ini dapat menyelesaikan persoalan 15-puzzle dengan menggunakan Algoritma Branch and Bound.
+- Program ini dapat menampilkan urutan langkah penyelesaian persoalan 15-puzzle.
+- Program ini dapat menampilkan waktu yang dibutuhkan untuk menyelesaikan persoalan 15-puzzle.
+- Program ini dapat menampilkan total simpul yang dibangkitkan dalam menyelesaikan persoalan 15-puzzle.
 
 ## Requirement
 Program ini membutuhkan Python versi 3.10 ke atas dan membutuhkan library numpy. Sebagai referensi, penulis menggunakan Python versi 3.10.2 dan library numpy versi 1.22.2.
