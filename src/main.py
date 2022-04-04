@@ -11,9 +11,9 @@ class Puzzle:
         self.EmptyRow = 0
         self.EmptyCol = 0
         self.cost = 0
-        self.kurang = []
+        self.kurang = [0 for i in range(16)]
         self.totalKurang = 0
-        self.solution = []
+        self.solution = None
         self.route = []
         self.visited = set()
         self.banyakSimpul = 1
@@ -27,7 +27,7 @@ class Puzzle:
 
         # Pilihan input
         choice = int(input("Masukkan pilihan: "))
-        while (choice < 1 or choice > 2 or type(choice) != int):
+        while (choice < 1 or choice > 2):
             print("Pilihan tidak valid")
             choice = int(input("Masukan pilihan: "))
         matriks = []
@@ -72,10 +72,7 @@ class Puzzle:
             for j in range(i+1,16):
                 if (self.matriks[j//4][j%4] < self.matriks[i//4][i%4]):
                     temp += 1
-            self.kurang.append(temp)
-        
-        # if ((self.EmptyRow+self.EmptyCol)%2 == 1):
-        #     self.totalKurang += 1
+            self.kurang[self.matriks[i//4][i%4] - 1] = temp
 
     # Method untuk menyelesaikan puzzle
     def solve(self):
@@ -87,7 +84,7 @@ class Puzzle:
         # Perulangan untuk mencari solusi
         while (not queue.isEmpty()):
             current = queue.pop()
-            # print("Current: ", current.depth, ",", current.cost)
+            # print("Current: ", current.depth, " misplaced:", current.misplaced, " dsan cost: ", current.cost)
 
             # Mengecek apakah sebuah matriks sudah pernah dicek atau belum
             if (np.array(current.matriks).tobytes() in self.visited):
@@ -97,19 +94,20 @@ class Puzzle:
 
             if (current.isGoal()):
             # Cek apakah node ini merupakan goal node
-                self.solution.append(current)
+                self.solution = current
+                # print("Solusi ditemukan dengan depth: ", current.depth, " misplaced:", current.misplaced, " dan cost: ", current.cost)
                 queue.kill(current.cost)
-                break
             else:
             # Jika bukan goal node, bangkitkan anak-anak berdasarkan node yang dicek
                 child = current.getChildren()
                 self.banyakSimpul += len(child)
                 for node in child:
-                    queue.push(node)
+                    if (self.solution == None or node.cost < self.solution.cost):
+                        queue.push(node)
 
     # Method untuk mencari rute dari sebuah solusi yang ditemukan
     def findRoute(self):
-        result = self.solution[0]
+        result = self.solution
         while (result.parent != None):
             self.route.append(result)
             result = result.parent
@@ -139,40 +137,43 @@ class Puzzle:
             print("\n\t+-----+-----+-----+-----+")
 
 # ======== MAIN PROGRAM ======== #
-game = Puzzle()
-print("\nKonfigurasi game:")
-game.printMatriks()
+if __name__ == "__main__":
+    game = Puzzle()
+    print("\nKonfigurasi game:")
+    game.printMatriks()
 
-# Mencetak tabel kurang
-print("\n======================================")
-print("Tabel kurang:")
-for i in range(8):
-    print("\t", i+1, ": ", game.kurang[i], "\t", i+8, ": ", game.kurang[i+8])
-print("\tX: ", (game.EmptyRow+game.EmptyCol)%2)
+    # Mencetak tabel kurang
+    print("\n======================================")
+    print("Nilai fungsi kurang(i):")
+    for i in range(8):
+        print("\t", i+1, ": ", game.kurang[i], "\t", i+9, ": ", game.kurang[i+8])
+    print("\t\t  X :", (game.EmptyRow+game.EmptyCol)%2)
 
-# check Kurang(i) + X
-print("Total Kurang + X : " + str(sum(game.kurang) + (game.EmptyRow+game.EmptyCol)%2))
-print("======================================\n")
+    # check Kurang(i) + X
+    print("Total Kurang + X : " + str(sum(game.kurang) + (game.EmptyRow+game.EmptyCol)%2))
+    print("======================================")
 
-# Jika Kurang(i) + X ganjil makan tidak ada solusi
-if (game.totalKurang%2 == 1):
-    print("Puzzle tidak dapat diselesaikan")
-else:
-    print("Puzzle dapat diselesaikan")
-    # Memulai timer
-    start = time.process_time_ns()
+    # Jika Kurang(i) + X ganjil makan tidak ada solusi
+    if (game.totalKurang%2 == 1):
+        print("\tPuzzle tidak dapat diselesaikan")
+        print("======================================\n")
+    else:
+        print("\tPuzzle dapat diselesaikan")
+        print("======================================\n")
+        # Memulai timer
+        start = time.process_time_ns()
 
-    # Solve puzzle
-    game.solve()
-    
-    # Mencari route dari solusi yang ditemukan
-    game.findRoute()
+        # Solve puzzle
+        game.solve()
+        
+        # Mencari route dari solusi yang ditemukan
+        game.findRoute()
 
-    # Mengakhiri timer
-    end = time.process_time_ns()
-    duration = end - start
+        # Mengakhiri timer
+        end = time.process_time_ns()
+        duration = end - start
 
-    # Menampilkan hasil
-    game.printResult()
-    print("Total Pergeseran: ", len(game.route))
-    print("Waktu eksekusi: ", duration/1000000, " ms")
+        # Menampilkan hasil
+        game.printResult()
+        print("Total Pergeseran: ", len(game.route))
+        print("Waktu eksekusi: ", duration/1000000, " ms")

@@ -8,26 +8,27 @@ class Direction(Enum):
 
 class Node:
     # Constructor
-    def __init__(self, matriks, cost, emptyRow, emptyCol, route = [], parent = None, depth = 0):
+    def __init__(self, matriks, misplaced, emptyRow, emptyCol, route = [], parent = None, depth = 0):
         self.matriks = matriks
         self.route = route
         self.parent = parent
         self.depth = depth
-        self.cost = cost
+        self.misplaced = misplaced
+        self.cost = misplaced + depth
         self.emptyRow = emptyRow
         self.emptyCol = emptyCol
     
     # Method print untuk mencetak info node, untuk pengecekan
     def print(self):
         print("Route: ", self.route)
-        print("Parent: " + str(self.parent))
         print("Depth: " + str(self.depth))
+        print("Misplaced: " + str(self.misplaced))
         print("Cost: " + str(self.cost))
         self.printMatriks()
     
     # Method untuk mengecek apakah merupakan goal node
     def isGoal(self):
-        return self.matriks == [[1,2,3,4],[5,6,7,8],[9,10,11,12],[13,14,15,16]]
+        return self.misplaced == 0
 
     # Method untuk membangkitkan anak-anak dari suatu node
     def getChildren(self):
@@ -60,11 +61,11 @@ class Node:
             if (self.emptyRow != newEmptyRow or self.emptyCol != newEmptyCol):
                 # Menghitung misplaced pada susunan matriks baru
                 misplaced = 0
+                if (childMat[newEmptyRow][newEmptyCol] == newEmptyRow*4 + newEmptyCol + 1): misplaced += 1
                 if (childMat[newEmptyRow][newEmptyCol] == self.emptyRow*4 + self.emptyCol + 1): misplaced -= 1
                 childMat[self.emptyRow][self.emptyCol], childMat[newEmptyRow][newEmptyCol] = childMat[newEmptyRow][newEmptyCol], childMat[self.emptyRow][self.emptyCol]
-                if (childMat[newEmptyRow][newEmptyCol] == self.emptyRow*4 + self.emptyCol + 1): misplaced += 1
                 # Menambahkan node baru ke children
-                children.append(Node(childMat, self.cost + misplaced + 1, newEmptyRow, newEmptyCol, childRoute, self, self.depth + 1))
+                children.append(Node(childMat, self.misplaced + misplaced, newEmptyRow, newEmptyCol, childRoute, self, self.depth + 1))
         
         return children
 
