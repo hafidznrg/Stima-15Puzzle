@@ -12,7 +12,6 @@ class Puzzle:
         self.EmptyCol = 0
         self.cost = 0
         self.kurang = [0 for i in range(16)]
-        self.totalKurang = 0
         self.solution = None
         self.route = []
         self.visited = set()
@@ -154,11 +153,11 @@ if __name__ == "__main__":
     print("======================================")
 
     # Jika Kurang(i) + X ganjil makan tidak ada solusi
-    if (game.totalKurang%2 == 1):
-        print("\tPuzzle tidak dapat diselesaikan")
+    if ((sum(game.kurang) + (game.EmptyRow+game.EmptyCol)%2)%2 == 1):
+        print("   Puzzle tidak dapat diselesaikan")
         print("======================================\n")
     else:
-        print("\tPuzzle dapat diselesaikan")
+        print("     Puzzle dapat diselesaikan")
         print("======================================\n")
         # Memulai timer
         start = time.process_time_ns()
